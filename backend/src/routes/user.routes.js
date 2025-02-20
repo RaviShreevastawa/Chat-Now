@@ -1,8 +1,8 @@
 import express from "express";
-import protectRoute from "../../middleware/protectRoute.js";
+import protectRoute from "../middleware/protectRoute.js";
 import { getUsersForSidebar } from "../controller/user.controller.js";
 
-const router = express.Router;
+const router = express.Router();
 
 router.get("/",protectRoute, getUsersForSidebar)
 
