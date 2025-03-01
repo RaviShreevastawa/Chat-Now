@@ -12,3 +12,4 @@ export const getUsersForSidebar = async (req, res) => {
         res.send(500).json({error : "Internal server error"});
     }
 }
+
