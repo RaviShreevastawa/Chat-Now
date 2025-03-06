@@ -11,7 +11,7 @@ const useGetConversations = () => {
 			try {
 				const res = await fetch("http://localhost:3000/api/users", {
 					method: "GET",
-					credentials: "include", // Send cookies
+					credentials: "include",
 				});
 				const data = await res.json();
 
@@ -19,7 +19,7 @@ const useGetConversations = () => {
 					throw new Error(data.error);
 				}
 
-				setConversations(data.filtereduser); // Extract the correct array
+				setConversations(data.filtereduser); 
 			} catch (error) {
 				toast.error(error.message);
 			} finally {

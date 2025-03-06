@@ -22,7 +22,7 @@ const useSendMessage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ message }),
-          credentials: "include", //Fix  Send cookies (JWT token) with request
+          credentials: "include", 
         }
       );
 

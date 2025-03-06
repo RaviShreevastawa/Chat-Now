@@ -8,7 +8,7 @@ const useGetMessages = () => {
 
     useEffect(() => {
         const getMessages = async () => {
-            if (!selectedConversation?._id) return; // ✅ Prevent API call if no conversation is selected
+            if (!selectedConversation?._id) return;
             setLoading(true);
 
             try {
@@ -22,11 +22,10 @@ const useGetMessages = () => {
 
                 const data = await res.json();
 
-                console.log("Fetched messages:", data); // ✅ Debug API response
+                console.log("Fetched messages:", data);
 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                if (!data) throw new Error(data.error);
+                
 
                 if (!Array.isArray(data)) {
                     throw new Error("Unexpected API response: messages should be an array.");
@@ -43,7 +42,7 @@ const useGetMessages = () => {
         getMessages();
     }, [selectedConversation?._id, setMessages]);
 
-    return { messages: messages || [], loading }; // ✅ Ensure messages is always an array
+    return { messages, loading }; 
 };
 
 export default useGetMessages;
