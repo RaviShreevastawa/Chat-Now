@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useAuthContext } from "../context/AuthContext";
+import { useAuthContext } from "../Context/AuthContext";
 
 const useLogin = () => {
 	const [loading, setLoading] = useState(false);
@@ -16,10 +16,9 @@ const useLogin = () => {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ username, password }),
-				credentials: "include", // ✅ Ensure cookies are sent if using sessions/JWT in cookies
+				credentials: "include",
 			});
 
-			// Read raw response text before parsing
 			const text = await res.text();
 			console.log("Raw server response:", text);
 
