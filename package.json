@@ -1,11 +1,11 @@
 {
-  "name": "backend",
+  "name": "chat-now",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon backend/server.js",
-    "build":"npm install && npm install --prefix frontend && npm run build --prefix frontend/index.js"
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "type": "module",
   "author": "Ravi",

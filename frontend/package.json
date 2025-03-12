@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
-    "backend": "file:..",
+    "autoprefixer": "^10.4.17",
+    "chat-now": "file:..",
+    "postcss": "^8.4.33",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.5.2",
