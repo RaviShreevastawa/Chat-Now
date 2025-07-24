@@ -12,7 +12,9 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
     "autoprefixer": "^10.4.17",
+    "axios": "^1.10.0",
     "chat-now": "file:..",
+    "moment": "^2.30.1",
     "postcss": "^8.4.33",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -22,6 +24,7 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.0.6",
+    "timeago.js": "^4.0.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuthContext } from "../Context/AuthContext";
+import API from "../Api/api"
 
 const useLogin = () => {
 	const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ const useLogin = () => {
 
 		setLoading(true);
 		try {
-			const res = await fetch("api/auth/login", {
+			const res = await fetch("http://localhost:4000/api/auth/login", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ username, password }),
@@ -33,7 +34,6 @@ const useLogin = () => {
 				throw new Error(data.error || "Login failed");
 			}
 
-			// ✅ Store user info in local storage only if data contains valid user info
 			if (data && data._id) {
 				localStorage.setItem("chat-user", JSON.stringify(data));
 				setAuthUser(data);

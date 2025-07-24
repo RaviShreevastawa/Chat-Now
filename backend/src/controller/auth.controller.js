@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateTokens.js";
+import cloudinary from "../config/cloudinaryConfig.js"; 
+import fs from "fs";
 
 export const registerUser = async (req, res) => {
 	try {
@@ -87,17 +89,69 @@ export const loginUser = async (req, res) => {
 	}
 };
 
-export const logoutUser = (req, res) => {
+export const logoutUser = async (req, res) => {
 	try {
+		const userId = req.user?._id;
+
+		if (userId) {
+			await User.findByIdAndUpdate(userId, { lastSeen: new Date() });
+		}
+
+		// Clear JWT cookie
 		res.cookie("jwt", "", {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "strict",
-			maxAge: 0, // Immediately expires
+			maxAge: 0,
 		});
+
 		res.status(200).json({ message: "Logged out successfully" });
 	} catch (error) {
 		console.error("Error in logout controller:", error.message);
 		res.status(500).json({ error: "Internal Server Error" });
 	}
+};
+
+
+export const uploadProfilePic = async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "chat-app/profile-pics",
+      width: 300,
+      crop: "scale",
+    });
+
+    // Delete temp file after upload
+    fs.unlinkSync(file.path);
+
+    // Update user's profilePic in DB (assumes req.user._id is available from middleware)
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePic: result.secure_url },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({ profilePic: user.profilePic });
+  } catch (err) {
+    console.error("Upload failed:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+};
+
+
+export const getLastSeen = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("lastSeen");
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.status(200).json({ lastSeen: user.lastSeen });
+  } catch (err) {
+    res.status(500).json({ error: "Could not fetch last seen" });
+  }
 };

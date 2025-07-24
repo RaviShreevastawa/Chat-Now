@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthContext } from "../Context/AuthContext";
+//import API from "../Api/api"
 
 function useSignUp() {
     const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ function useSignUp() {
 
         setLoading(true);
         try {
-            const res = await fetch('api/auth/register', {
+            const res = await fetch('http://localhost:4000/api/auth/register', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ fullname, username, password, confirmPassword, gender }),
@@ -22,7 +23,7 @@ function useSignUp() {
             console.log(data);
 
              if(data.error){
-                throw new Error(data.Error)
+                throw new Error(data.error)
              }
 
              localStorage.setItem("chat-user", JSON.stringify(data))

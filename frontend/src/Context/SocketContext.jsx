@@ -1,34 +1,54 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext, useRef } from "react";
 import { useAuthContext } from "./AuthContext";
 import io from "socket.io-client";
+import useConversationStore  from "../zustand/useConversation";
 
 const SocketContext = createContext();
 
-export const useSocketContext = () => {
-	return useContext(SocketContext);
-};
+export const useSocketContext = () => useContext(SocketContext);
 
 export const SocketContextProvider = ({ children }) => {
 	const [socket, setSocket] = useState(null);
 	const [onlineUsers, setOnlineUsers] = useState([]);
+	const [typingUsers, setTypingUsers] = useState([]);
 	const { authUser } = useAuthContext();
+	const { setConversations } = useConversationStore();
+	const timeoutRef = useRef(null);
 
 	useEffect(() => {
 		if (authUser) {
-			const socket = io("https://chat-now-6mwd.onrender.com", {
-				query: {
-					userId: authUser._id,
-				},
+			const newSocket = io("https://chat-now-6mwd.onrender.com", {
+				query: { userId: authUser._id },
 			});
+			setSocket(newSocket);
 
-			setSocket(socket);
-
-			// socket.on() is used to listen to the events. can be used both on client and server side
-			socket.on("getOnlineUsers", (users) => {
+			newSocket.on("getOnlineUsers", (users) => {
 				setOnlineUsers(users);
 			});
 
-			return () => socket.close();
+			newSocket.on("messagesSeen", ({ receiverId }) => {
+				setConversations((prev) =>
+					prev.map((convo) => {
+						if (convo._id === receiverId) {
+							convo.messages = convo.messages.map((m) => ({ ...m, isSeen: true }));
+						}
+						return convo;
+					})
+				);
+			});
+
+			newSocket.on("user-typing", ({ from }) => {
+				setTypingUsers((prev) => [...new Set([...prev, from])]);
+				clearTimeout(timeoutRef.current);
+				timeoutRef.current = setTimeout(() => {
+					setTypingUsers((prev) => prev.filter((u) => u !== from));
+				}, 3000);
+			});
+
+			return () => {
+				newSocket.close();
+				setSocket(null);
+			};
 		} else {
 			if (socket) {
 				socket.close();
@@ -37,5 +57,9 @@ export const SocketContextProvider = ({ children }) => {
 		}
 	}, [authUser]);
 
-	return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
+	return (
+		<SocketContext.Provider value={{ socket, onlineUsers, typingUsers }}>
+			{children}
+		</SocketContext.Provider>
+	);
 };

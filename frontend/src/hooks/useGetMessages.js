@@ -12,7 +12,7 @@ const useGetMessages = () => {
             setLoading(true);
 
             try {
-                const res = await fetch(`api/message/${selectedConversation._id}`, {
+                const res = await fetch(`http://localhost:4000/api/message/${selectedConversation._id}`, {
                     method: "GET",
                     credentials: "include",
                     headers: {
@@ -24,7 +24,9 @@ const useGetMessages = () => {
 
                 console.log("Fetched messages:", data);
 
-                if (!data) throw new Error(data.error);
+                if (!res.ok) {
+                    throw new Error(data?.error || "Failed to fetch messages");
+                }
                 
 
                 if (!Array.isArray(data)) {

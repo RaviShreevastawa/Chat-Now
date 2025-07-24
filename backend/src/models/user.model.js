@@ -26,6 +26,10 @@ const userModel = new Schema({
         type : String,
         default : ""
     },
+    lastSeen: {
+        type: Date,
+        default: Date.now
+    }
 }, {timestamps : true})
 
 
