@@ -4,6 +4,8 @@ import MessageInput from './MessageInput';
 import { TiMessages } from 'react-icons/ti';
 import useConversation from '../../zustand/useConversation';
 import { useAuthContext } from '../../Context/AuthContext';
+import Profile from "../../Pages/profile/Profile"
+import { Navigate } from 'react-router-dom';
 
 function MessageContainer() {
 	const { selectedConversation, setSelectedConversation } = useConversation();
@@ -82,6 +84,12 @@ const NoChatSelected = () => {
 
 	return (
 		<div className='flex items-center justify-center w-full h-full'>
+				<img
+				src={authUser?.profilePic}
+				alt={authUser.fullname}
+				onClick= {() => Navigate("/profile")}
+				className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-md"
+				/>
 			<div className='px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2'>
 				<p>Welcome 👏 {authUser?.fullname || "User"} </p>
 				<p>Select a chat to start messaging</p>

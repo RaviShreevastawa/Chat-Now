@@ -33,11 +33,22 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/message", messageRoute);
 
-// ✅ Static files
-app.use(express.static(path.join(__dirname, "/frontend/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-});
+// ✅ Serve frontend only in production and if build exists
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, 'frontend', 'dist');
+
+  app.use(express.static(frontendPath));
+
+  app.get('*', (req, res) => {
+    const indexPath = path.join(frontendPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        res.status(500).send("Frontend not found. Did you build it?");
+      }
+    });
+  });
+}
+
 
 // ✅ Start Server
 server.listen(PORT, () => {
