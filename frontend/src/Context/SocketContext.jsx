@@ -17,7 +17,7 @@ export const SocketContextProvider = ({ children }) => {
 
 	useEffect(() => {
 		if (authUser) {
-			const newSocket = io("https://chat-now-1-3o18.onrender.com", {
+			const newSocket = io(import.meta.env.VITE_API_URL, {
 				query: { userId: authUser._id },
 				withCredentials: true,
 				transports: ['websocket'], // force WebSocket if needed
