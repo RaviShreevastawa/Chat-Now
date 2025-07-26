@@ -3,6 +3,7 @@ import useConversation from "../../zustand/useConversation";
 import { useAuthContext } from "../../Context/AuthContext";
 import { extractTime } from "../../utils/extractTime";
 import { FaCheck, FaCheckDouble } from "react-icons/fa";
+import API from "../../Api/api"; // ✅ axios instance
 
 const Message = ({ message }) => {
 	const { authUser } = useAuthContext();
@@ -44,44 +45,36 @@ const Message = ({ message }) => {
 
 	const handleDelete = async () => {
 		try {
-			const res = await fetch(`http://localhost:4000/api/message/${message._id}`, {
-				method: "DELETE",
-				credentials: "include",
-			});
-			if (res.ok) {
-				setMessages((prev) =>
-					prev.map((m) =>
-						m._id === message._id
-							? { ...m, message: "This message was deleted", deleted: true }
-							: m
-					)
-				);
-			}
+			await API.delete(`/api/message/${message._id}`);
+			setMessages((prev) =>
+				prev.map((m) =>
+					m._id === message._id
+						? { ...m, message: "This message was deleted", deleted: true }
+						: m
+				)
+			);
 		} catch (err) {
 			console.error("Failed to delete:", err);
 		}
 	};
 
+
 	const handleEdit = async () => {
 		try {
-			const res = await fetch(`http://localhost:4000/api/message/${message._id}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ newMessage: editText }),
+			await API.put(`/api/message/${message._id}`, {
+				newMessage: editText,
 			});
-			if (res.ok) {
-				setMessages((prev) =>
-					prev.map((m) =>
-						m._id === message._id ? { ...m, message: editText, edited: true } : m
-					)
-				);
-				setIsEditing(false);
-			}
+			setMessages((prev) =>
+				prev.map((m) =>
+					m._id === message._id ? { ...m, message: editText, edited: true } : m
+				)
+			);
+			setIsEditing(false);
 		} catch (err) {
 			console.error("Failed to edit:", err);
 		}
 	};
+
 
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter") {

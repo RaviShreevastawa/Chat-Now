@@ -5,7 +5,8 @@ import { TiMessages } from 'react-icons/ti';
 import useConversation from '../../zustand/useConversation';
 import { useAuthContext } from '../../Context/AuthContext';
 import Profile from "../../Pages/profile/Profile"
-import { Navigate } from 'react-router-dom';
+import API from "../../Api/api";
+import { useNavigate } from 'react-router-dom';
 
 function MessageContainer() {
 	const { selectedConversation, setSelectedConversation } = useConversation();
@@ -34,10 +35,7 @@ function MessageContainer() {
 			if (!selectedConversation?._id) return;
 
 			try {
-				await fetch(`http://localhost:4000/api/message/seen/${selectedConversation._id}`, {
-					method: 'PUT',
-					credentials: 'include',
-				});
+				await API.put(`/api/message/seen/${selectedConversation._id}`);
 				// ✅ This will re-trigger your useGetMessages since it depends on selectedConversation._id
 				// But if your Zustand doesn't refetch messages on update, manually do this:
 				// setMessages((prev) => [...prev]) to force state update (if needed)
@@ -81,13 +79,14 @@ export default MessageContainer;
 
 const NoChatSelected = () => {
 	const { authUser } = useAuthContext();
+	const navigate = useNavigate(); // ✅ Hook
 
 	return (
 		<div className='flex items-center justify-center w-full h-full'>
 				<img
 				src={authUser?.profilePic}
 				alt={authUser.fullname}
-				onClick= {() => Navigate("/profile")}
+				onClick={() => navigate("/profile")} // ✅ Correct usage
 				className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-md"
 				/>
 			<div className='px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2'>

@@ -4,6 +4,7 @@ import { useAuthContext } from "../Context/AuthContext";
 import API from "../Api/api"
 
 const useLogin = () => {
+	
 	const [loading, setLoading] = useState(false);
 	const { setAuthUser } = useAuthContext();
 
@@ -13,26 +14,12 @@ const useLogin = () => {
 
 		setLoading(true);
 		try {
-			const res = await fetch("http://localhost:4000/api/auth/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, password }),
-				credentials: "include",
+			const res = await API.post("/api/auth/login", {
+				username,
+				password,
 			});
 
-			const text = await res.text();
-			console.log("Raw server response:", text);
-
-			let data;
-			try {
-				data = JSON.parse(text);
-			} catch (jsonError) {
-				throw new Error("Invalid JSON response from server");
-			}
-
-			if (!res.ok) {
-				throw new Error(data.error || "Login failed");
-			}
+			const data = res.data;
 
 			if (data && data._id) {
 				localStorage.setItem("chat-user", JSON.stringify(data));
@@ -43,11 +30,13 @@ const useLogin = () => {
 			}
 
 		} catch (error) {
-			toast.error(error.message);
+			const message = error?.response?.data?.error || error.message || "Login failed";
+			toast.error(message);
 		} finally {
 			setLoading(false);
 		}
 	};
+
 
 	return { loading, login };
 };

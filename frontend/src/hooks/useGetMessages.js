@@ -1,50 +1,40 @@
 import { useEffect, useState } from "react";
 import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
+import API from "../Api/api"; // ✅ Import the axios instance
 
 const useGetMessages = () => {
-    const [loading, setLoading] = useState(false);
-    const { messages, setMessages, selectedConversation } = useConversation();
+	const [loading, setLoading] = useState(false);
+	const { messages, setMessages, selectedConversation } = useConversation();
 
-    useEffect(() => {
-        const getMessages = async () => {
-            if (!selectedConversation?._id) return;
-            setLoading(true);
+	useEffect(() => {
+		const getMessages = async () => {
+			if (!selectedConversation?._id) return;
+			setLoading(true);
 
-            try {
-                const res = await fetch(`http://localhost:4000/api/message/${selectedConversation._id}`, {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
+			try {
+				const res = await API.get(`/api/message/${selectedConversation._id}`);
 
-                const data = await res.json();
+				const data = res.data;
+				console.log("Fetched messages:", data);
 
-                console.log("Fetched messages:", data);
+				if (!Array.isArray(data)) {
+					throw new Error("Unexpected API response: messages should be an array.");
+				}
 
-                if (!res.ok) {
-                    throw new Error(data?.error || "Failed to fetch messages");
-                }
-                
+				setMessages(data);
+			} catch (error) {
+				const msg = error?.response?.data?.error || error.message || "Failed to fetch messages";
+				toast.error(msg);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-                if (!Array.isArray(data)) {
-                    throw new Error("Unexpected API response: messages should be an array.");
-                }
+		getMessages();
+	}, [selectedConversation?._id, setMessages]);
 
-                setMessages(data);
-            } catch (error) {
-                toast.error(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getMessages();
-    }, [selectedConversation?._id, setMessages]);
-
-    return { messages, loading }; 
+	return { messages, loading };
 };
 
 export default useGetMessages;
