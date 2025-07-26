@@ -19,6 +19,8 @@ export const SocketContextProvider = ({ children }) => {
 		if (authUser) {
 			const newSocket = io("https://chat-now-1-3o18.onrender.com", {
 				query: { userId: authUser._id },
+				withCredentials: true,
+				transports: ['websocket'], // force WebSocket if needed
 			});
 			setSocket(newSocket);
 
@@ -55,6 +57,10 @@ export const SocketContextProvider = ({ children }) => {
 				setSocket(null);
 			}
 		}
+		// ✅ Cleanup the socket connection on unmount or authUser change
+		return () => {
+			newSocket.disconnect();
+		};
 	}, [authUser]);
 
 	return (
