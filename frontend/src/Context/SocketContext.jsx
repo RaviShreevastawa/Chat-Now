@@ -12,16 +12,15 @@ export const SocketContextProvider = ({ children }) => {
 	const [typingUsers, setTypingUsers] = useState([]);
 	const { authUser } = useAuthContext();
 	const { setConversations } = useConversationStore();
-	const timeoutRef = useRef({}); // Change to object to handle multiple users separately
+	const timeoutRef = useRef({});
 
 	useEffect(() => {
-		if (!authUser) {
-			if (socket) {
-				socket.disconnect();
-				setSocket(null);
-			}
-			return;
-		}
+		if (!authUser) return;
+
+		// Prevent socket reconnecting on intermediate stale state
+		if (!authUser._id || authUser._id === "undefined") return;
+
+		console.log("🔌 Socket connect with userId:", authUser._id);
 
 		const newSocket = io(import.meta.env.VITE_API_URL, {
 			query: { userId: authUser._id },
@@ -37,16 +36,11 @@ export const SocketContextProvider = ({ children }) => {
 
 		newSocket.on("messagesSeen", ({ receiverId }) => {
 			setConversations((prevConvos) =>
-				prevConvos.map((convo) => {
-					if (convo._id === receiverId) {
-						const updatedMessages = convo.messages.map((m) => ({
-							...m,
-							isSeen: true,
-						}));
-						return { ...convo, messages: updatedMessages };
-					}
-					return convo;
-				})
+				prevConvos.map((convo) =>
+					convo._id === receiverId
+						? { ...convo, messages: convo.messages.map((m) => ({ ...m, isSeen: true })) }
+						: convo
+				)
 			);
 		});
 
@@ -60,14 +54,15 @@ export const SocketContextProvider = ({ children }) => {
 			}, 3000);
 		});
 
-		// Cleanup on component unmount or authUser change
 		return () => {
+			console.log("🔌 Disconnecting socket for userId:", authUser._id);
 			newSocket.disconnect();
 			setSocket(null);
-			setTypingUsers([]);
 			setOnlineUsers([]);
+			setTypingUsers([]);
 		};
-	}, [authUser]);
+	}, [authUser?._id]); // <-- only rerun effect when user ID changes
+
 
 	return (
 		<SocketContext.Provider value={{ socket, onlineUsers, typingUsers }}>

@@ -27,12 +27,15 @@ export const getReceiverSocketId = (receiverId) => {
 io.on("connection", (socket) => {
 	console.log("✅ User connected:", socket.id);
 
-	const userId = socket.handshake.query.userId;
+	const userId = socket.handshake.query?.userId;
 
-	if (userId && userId !== "undefined") {
-		userSocketMap[userId] = socket.id;
-		io.emit("getOnlineUsers", Object.keys(userSocketMap));
+	if (!userId || userId === "undefined" || userId === "null") {
+		console.warn("❌ Invalid userId received, disconnecting:", socket.id);
+		return socket.disconnect(true);
 	}
+
+	userSocketMap[userId] = socket.id;
+	io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
 	socket.on("markSeen", async ({ senderId, receiverId }) => {
 		try {
@@ -52,7 +55,6 @@ io.on("connection", (socket) => {
 	socket.on("disconnect", async () => {
 		console.log("❌ User disconnected:", socket.id);
 
-		// Clean up userSocketMap and update lastSeen
 		if (userId && userId !== "undefined") {
 			delete userSocketMap[userId];
 			try {
@@ -64,5 +66,6 @@ io.on("connection", (socket) => {
 		}
 	});
 });
+
 
 export { app, io, server };
